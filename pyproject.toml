@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "Django>=5.2,<5.3",
-    "wagtail>=7.0,<7.1",
+    "wagtail>=7.4,<7.5",
     "python-webpack-boilerplate>=1.0.4",
     "wagtail-seo>=3.1.0",
     "wagtail-flexible-forms>=2.1.0",
