@@ -94,9 +94,9 @@ MIDDLEWARE = [
     "turbo_helper.middleware.TurboMiddleware",
 ]
 
-# if not DEBUG:
-#     MIDDLEWARE.insert(1, "wagtailcache.cache.UpdateCacheMiddleware")
-#     MIDDLEWARE.append("wagtailcache.cache.FetchFromCacheMiddleware")
+if not DEBUG:
+    MIDDLEWARE.insert(1, "wagtailcache.cache.UpdateCacheMiddleware")
+    MIDDLEWARE.append("wagtailcache.cache.FetchFromCacheMiddleware")
 
 ROOT_URLCONF = "config.urls"
 
