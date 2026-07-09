@@ -3,14 +3,17 @@ from django.db import models
 from wagtail.models import Page
 from wagtail.admin.panels import FieldPanel
 from wagtailseo.models import SeoMixin
+from wagtailcache.cache import WagtailCacheMixin
 
 
-class BasePage(SeoMixin, Page):
+class BasePage(WagtailCacheMixin, SeoMixin, Page):
     """
     Abstract base page model that defines common fields and
     functionality that should be shared across all page types.
     Inherits from SeoMixin to provide SEO functionality via wagtail-seo.
     """
+
+    cache_control = "public, max-age=300, stale-while-revalidate=60"
 
     # Add a UUID field to provide a stable identifier for all page types
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
