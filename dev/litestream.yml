@@ -1,5 +1,5 @@
-access-key-id: minioadmin
-secret-access-key: minioadminpassword
+access-key-id: rustfsadmin
+secret-access-key: rustfsadmin
 
 dbs:
   - path: /data/database.db

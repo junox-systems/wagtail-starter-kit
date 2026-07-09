@@ -1,0 +1,64 @@
+#!/bin/sh
+
+# PROVIDE: wagtail
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="wagtail"
+rcvar="${name}_enable"
+
+load_rc_config "$name"
+
+: ${wagtail_enable:=NO}
+: ${wagtail_runuser:=www}
+: ${wagtail_rungroup:=www}
+: ${wagtail_pidfile:=/var/run/wagtail/supervisor.pid}
+: ${wagtail_child_pidfile:=/var/run/wagtail/app.pid}
+: ${wagtail_sock:=/var/run/wagtail/wagtail.sock}
+: ${wagtail_log:=/var/log/wagtail.log}
+: ${wagtail_rundir:=/var/run/wagtail}
+
+pidfile="${wagtail_pidfile}"
+child_pidfile="${wagtail_child_pidfile}"
+
+command="/usr/sbin/daemon"
+procname="/usr/sbin/daemon"
+
+command_args="-r -R 5 \
+    -u ${wagtail_runuser} \
+    -P ${pidfile} \
+    -p ${child_pidfile} \
+    -o ${wagtail_log} \
+    -t ${name} \
+    -f \
+    /usr/bin/env HOME=/nonexistent USER=${wagtail_runuser} LOGNAME=${wagtail_runuser} \
+    /usr/local/www/wagtail/prod/freebsd/scripts/start.sh"
+
+start_precmd="wagtail_prestart"
+stop_postcmd="wagtail_poststop"
+
+# ---- hooks ---- #
+
+wagtail_prestart()
+{
+    # create runtime dir (every boot)
+    install -d -o ${wagtail_runuser} -g ${wagtail_rungroup} -m 755 ${wagtail_rundir}
+
+    # create the log file as root and hand it over to the wagtail user
+    if [ ! -f "${wagtail_log}" ]; then
+        touch "${wagtail_log}"
+    fi
+    chown ${wagtail_runuser}:${wagtail_rungroup} "${wagtail_log}"
+
+    rm -f "${wagtail_sock}" "${pidfile}" "${child_pidfile}" 2>/dev/null || true
+}
+
+wagtail_poststop()
+{
+    # cleanup socket after stop
+    [ -S "${wagtail_sock}" ] && rm -f "${wagtail_sock}"
+}
+
+run_rc_command "$1"

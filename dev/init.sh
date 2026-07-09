@@ -12,6 +12,10 @@ make install
 # Add node_modules/.bin to PATH for vite command
 export PATH="/app/frontend/node_modules/.bin:$PATH"
 
+# Build frontend assets
+echo "Building frontend assets..."
+make vite-build
+
 # Run database migrations
 echo "Running database migrations..."
 make migrate

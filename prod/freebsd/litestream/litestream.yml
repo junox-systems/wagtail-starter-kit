@@ -1,0 +1,15 @@
+# credentials (from env)
+access-key-id: ${LITESTREAM_ACCESS_KEY_ID}
+secret-access-key: ${LITESTREAM_SECRET_ACCESS_KEY}
+
+dbs:
+  - path: ${DATABASE_PATH}
+    replicas:
+      - type: s3
+        bucket: ${LITESTREAM_BUCKET}
+        path: database.db
+        region: ${LITESTREAM_REGION}
+        endpoint: ${LITESTREAM_ENDPOINT_URL}
+        force-path-style: ${LITESTREAM_FORCE_PATH_STYLE}
+        sync-interval: 1h
+        snapshot-interval: 1h

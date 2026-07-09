@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# PROVIDE: litestream
+# REQUIRE: NETWORKING
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="litestream"
+rcvar="litestream_enable"
+
+: ${litestream_enable:=NO}
+: ${litestream_config:=/usr/local/etc/litestream.yml}
+: ${litestream_runuser:=www}
+: ${litestream_rungroup:=www}
+: ${litestream_log:=/var/log/litestream.log}
+: ${litestream_rundir:=/var/run/litestream}
+
+load_rc_config $name
+
+supervisor_pidfile="${litestream_rundir}/supervisor.pid"
+child_pidfile="${litestream_rundir}/app.pid"
+pidfile="${supervisor_pidfile}"
+
+procname="/usr/sbin/daemon"
+command="/usr/sbin/daemon"
+command_args="-r -R 5 \
+    -u ${litestream_runuser} \
+    -P ${pidfile} \
+    -p ${child_pidfile} \
+    -f \
+    -t ${name} \
+    -o ${litestream_log} -m 3 \
+    /usr/local/www/wagtail/prod/freebsd/scripts/litestream.sh"
+
+
+start_precmd="litestream_prestart"
+
+litestream_prestart()
+{
+    install -d -o ${litestream_runuser} -g ${litestream_rungroup} -m 755 "${litestream_rundir}"
+
+    if [ ! -f "${litestream_log}" ]; then
+        touch "${litestream_log}"
+    fi
+    chown ${litestream_runuser}:${litestream_rungroup} "${litestream_log}"
+
+    rm -f "${pidfile}" "${supervisor_pidfile}" 2>/dev/null || true
+}
+
+run_rc_command "$1"

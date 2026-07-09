@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "kilocode.kilo-code",
     "oderwat.indent-rainbow",
     "charliermarsh.ruff",
     "bradlc.vscode-tailwindcss",

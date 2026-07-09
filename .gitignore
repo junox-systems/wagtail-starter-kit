@@ -468,3 +468,8 @@ $RECYCLE.BIN/
 
 # Environment variables
 .env
+.pnpm-store/
+
+# Database
+db/*.db
+db/*.db-*

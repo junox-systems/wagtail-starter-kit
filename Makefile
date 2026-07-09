@@ -22,25 +22,17 @@ django-install:
 	uv sync --locked
 
 django-dev:
-	uv run granian --reload \
-		--reload-ignore-paths /app/db/ \
-		--interface asginl \
-		--workers 2 \
-		--runtime-mode mt \
-		--log-level debug \
-		--host 0.0.0.0 \
-		--port 8000 \
-		config.asgi:application
+	DEBUG=true uv run python manage.py runserver 0.0.0.0:8000
 
 .PHONY: vite-dev
 vite-dev:
-	cd frontend && bun --bun run dev
+	cd frontend && pnpm run dev
 
 frontend-install:
-	cd frontend && bun --bun install
+	cd frontend && pnpm install
 
 vite-build:
-	cd frontend && bun --bun run build
+	cd frontend && pnpm run build
 
 makemigrations make migrations:
 	uv run python manage.py makemigrations
@@ -61,9 +53,9 @@ dev-createsuperuser:
 prod-start:
 	env ENVIRONMENT=production uv run granian \
 		--interface asginl \
- 		--workers 3 \
+		--workers 3 \
  		--runtime-mode mt \
- 		--host 0.0.0.0 \
+		--host 0.0.0.0 \
  		--port 8000 \
  		config.asgi:application
 
