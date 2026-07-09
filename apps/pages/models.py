@@ -351,6 +351,7 @@ class AbstractShowcaseSection(ClusterableModel, Orderable):
 
     class Meta:
         abstract = True
+        ordering = ["sort_order"]
 
     def __str__(self):
         return f"{self.showcase_page.title} -> {self.heading}"
@@ -440,6 +441,7 @@ class AbstractShowcaseItem(ClusterableModel, Orderable):
 
     class Meta:
         abstract = True
+        ordering = ["sort_order"]
 
     def __str__(self):
         return f"{self.section.heading} -> {self.title}"
@@ -537,6 +539,7 @@ class AbstractShowcaseItemLink(Orderable):
 
     class Meta:
         abstract = True
+        ordering = ["sort_order"]
 
     def __str__(self):
         return f"{self.item.title} -> {self.title}"
