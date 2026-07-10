@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.0](https://github.com/junox-systems/wagtail-starter-kit/compare/v0.2.2...v0.3.0) (2026-07-10)
+
+
+### Features
+
+* cache by default in pages ([5c8b3bd](https://github.com/junox-systems/wagtail-starter-kit/commit/5c8b3bdaf2e8be85426fe6714552663e88e7d45b))
+* modular settings, rm sqlite cache ([65f2f92](https://github.com/junox-systems/wagtail-starter-kit/commit/65f2f92b61ec864b9471d46fbfe98e902f80342e))
+* upgrade vite to v8 ([06444b8](https://github.com/junox-systems/wagtail-starter-kit/commit/06444b87aa443a67a4db23b722e220f4b35df1d3))
+
+
+### Bug Fixes
+
+* sorting in items in pages ([8c50300](https://github.com/junox-systems/wagtail-starter-kit/commit/8c503004780a9a3bc960ebe0e1030c29f33f9b82))
+* treebeard version error ([f631dae](https://github.com/junox-systems/wagtail-starter-kit/commit/f631dae88c50c62bfe75ce0de5c6e1ac81dcdc82))
+* use default dev django server ([945e981](https://github.com/junox-systems/wagtail-starter-kit/commit/945e981b35084030a1e6ee26eeeab8cce9ef52cf))
+
 ## [0.2.2](https://github.com/junoxlabs/wagtail-starter-kit/compare/v0.2.1...v0.2.2) (2025-10-09)
 
 
