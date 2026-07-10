@@ -5,34 +5,25 @@ import environ
 # import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, False),
+    DJANGO_DEBUG=(bool, False),
     ENVIRONMENT=(str, "development"),
     SECRET_KEY=(str, "django-insecure-dummy-key-for-builds-and-dev-only"),
     # DATABASE_URL=(str, "sqlite:///dummy.db"),
+    DATABASE_PATH=(str, BASE_DIR / "db/database.db"),
     ALLOWED_HOSTS=(str, "*"),
     CSRF_TRUSTED_ORIGINS=(str, "https://*, http://*"),
     USE_X_FORWARDED_HOST=(bool, False),
+    USE_X_FORWARDED_PORT=(bool, False),
     WAGTAIL_SITE_NAME=(str, "Wagtail Starter Kit"),
     WAGTAILADMIN_BASE_URL=(str, "http://localhost:8000"),
 )
 
-# Take environment variables from .env file
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY")
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DEBUG")
-
+# Create a directory for SQLite database if it doesn't exist
+(BASE_DIR / "db").mkdir(parents=True, exist_ok=True)
 
 INSTALLED_APPS = [
     # Django apps
@@ -51,13 +42,13 @@ INSTALLED_APPS = [
     "wagtail.snippets",
     "wagtail.documents",
     "wagtail.images",
-    "wagtail.search",
+    # "wagtail.search",
     "wagtail.admin",
     "wagtail",
     # Optional Wagtail apps
     "wagtail.contrib.routable_page",
     "wagtail.contrib.settings",
-    "wagtail.contrib.search_promotions",
+    # "wagtail.contrib.search_promotions",
     # Third-party apps
     "taggit",
     "modelcluster",
@@ -82,8 +73,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "wagtailcache.cache.UpdateCacheMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -92,11 +83,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
     "turbo_helper.middleware.TurboMiddleware",
+    "wagtailcache.cache.FetchFromCacheMiddleware",
 ]
 
-if not DEBUG:
-    MIDDLEWARE.insert(1, "wagtailcache.cache.UpdateCacheMiddleware")
-    MIDDLEWARE.append("wagtailcache.cache.FetchFromCacheMiddleware")
 
 ROOT_URLCONF = "config.urls"
 
@@ -135,7 +124,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db/database.db",
+        "NAME": env("DATABASE_PATH"),
         "OPTIONS": {
             "transaction_mode": "IMMEDIATE",
             "timeout": 5,  # seconds
@@ -145,27 +134,11 @@ DATABASES = {
                 PRAGMA mmap_size=134217728;
                 PRAGMA journal_size_limit=27103364;
                 PRAGMA cache_size=2000;
+                PRAGMA busy_timeout=5000;
             """,
         },
-    },
-    "cache": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db/cache.db",
-        "OPTIONS": {
-            "transaction_mode": "IMMEDIATE",
-            "timeout": 5,  # seconds
-            "init_command": """
-                PRAGMA journal_mode=WAL;
-                PRAGMA synchronous=NORMAL;
-                PRAGMA mmap_size=134217728;
-                PRAGMA journal_size_limit=27103364;
-                PRAGMA cache_size=2000;
-            """,
-        },
-    },
+    }
 }
-
-DATABASE_ROUTERS = ["config.routers.CacheRouter"]
 
 
 # Password validation
@@ -202,6 +175,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+# Ensure the directory exists to prevent django staticfiles.W004 warning
+(BASE_DIR / "frontend/dist").mkdir(parents=True, exist_ok=True)
+
 STATICFILES_DIRS = [
     BASE_DIR / "frontend/dist",  # Vite build output
 ]
@@ -220,47 +196,8 @@ STORAGES = {
         },
     },
     "staticfiles": {
-        # "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
-}
-
-# AWS settings for S3
-AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="us-east-1")
-AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL", default=None)
-AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL = None
-AWS_S3_VERIFY = True
-AWS_QUERYSTRING_AUTH = True
-
-# When using MinIO, we need to set this to False to avoid SSL issues
-AWS_S3_SECURE_URLS = env("AWS_S3_SECURE_URLS", default=True)
-
-# Ensure query string authentication is enabled and set expiration
-AWS_QUERYSTRING_EXPIRE = env(
-    "AWS_QUERYSTRING_EXPIRE", default=1800
-)  # 1/2 hour expiration
-
-
-# http://whitenoise.evans.io/en/stable/django.html#WHITENOISE_IMMUTABLE_FILE_TEST
-def immutable_file_test(path, url):
-    # Match vite (rollup)-generated hashes, à la, `some_file-CSliV9zW.js`
-    return re.match(r"^.+[.-][0-9a-zA-Z_-]{8,12}\..+$", url)
-
-
-WHITENOISE_IMMUTABLE_FILE_TEST = immutable_file_test
-
-# Django-Vite Settings
-# ------------------------------------------------------------------------------
-DJANGO_VITE = {
-    "default": {
-        "dev_mode": True if env("ENVIRONMENT") == "development" else False,
-        "dev_server_host": "localhost",
-        "dev_server_port": 5173,
-    }
 }
 
 
@@ -272,33 +209,9 @@ MEDIA_URL = "/media/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Wagtail settings
-WAGTAIL_SITE_NAME = env("WAGTAIL_SITE_NAME")
-WAGTAILADMIN_BASE_URL = env("WAGTAILADMIN_BASE_URL")
-
-# Disable password validators for development
-AUTH_PASSWORD_VALIDATORS = []
-
-# SECURITY WARNING: define the correct hosts in production!
-# This should be set to your domain or IP address in production
-ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(",")
-CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS").split(",")
-USE_X_FORWARDED_HOST = env("USE_X_FORWARDED_HOST")
 
 # Increase the maximum number of fields for complex page models
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
-
-# Wagtail Cache settings
-WAGTAIL_CACHE = True
-WAGTAIL_CACHE_BACKEND = "default"
-
-# Cache settings
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "cache",
-    }
-}
 
 # Webpack loader settings
 WEBPACK_LOADER = {
