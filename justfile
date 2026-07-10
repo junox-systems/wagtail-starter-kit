@@ -176,15 +176,7 @@ django-install:
 	uv sync
 
 django-dev:
-	DEBUG=true uv run granian --reload \
-		--reload-ignore-paths /app/db/ \
-		--interface asginl \
-		--workers 2 \
-		--runtime-mode mt \
-		--log-level debug \
-		--host 0.0.0.0 \
-		--port 8000 \
-		config.asgi:application
+	DEBUG=true uv run manage.py runserver 127.0.0.1:8000
 
 makemigrations:
 	uv run manage.py makemigrations
