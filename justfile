@@ -148,9 +148,9 @@ setup-staticfiles:
 	CMD="$VENV_PY manage.py collectstatic --no-input --clear" just run-www
 
 setup-db:
-    just migrate
+    just prod-migrate
 
-migrate:
+prod-migrate:
 	CMD="$VENV_PY manage.py migrate" just run-www
 
 prod-start:
@@ -176,7 +176,7 @@ django-install:
 	uv sync
 
 django-dev:
-	uv run granian --reload \
+	DEBUG=true uv run granian --reload \
 		--reload-ignore-paths /app/db/ \
 		--interface asginl \
 		--workers 2 \
@@ -188,6 +188,9 @@ django-dev:
 
 makemigrations:
 	uv run manage.py makemigrations
+
+migrate:
+	uv run manage.py migrate
 
 vite-dev:
 	cd frontend && pnpm run dev
